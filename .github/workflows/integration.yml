@@ -62,7 +62,7 @@ jobs:
         echo "🔍 Testing database connectivity..."
         
         # Test PostgreSQL connection
-        docker compose exec db pg_isready -U postgres -d sim_leader_test
+        docker compose exec -T db pg_isready -U postgres -d sim_leader_test
         
         # Test that we can connect and query
         docker compose exec db psql -U postgres -d sim_leader_test -c "SELECT version();"
