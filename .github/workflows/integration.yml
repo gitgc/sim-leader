@@ -142,12 +142,12 @@ jobs:
         echo "🔍 Testing file upload directory..."
         
         # Check that uploads directory is properly mounted and accessible
-        docker compose exec app ls -la /usr/src/app/public/uploads/
-        docker compose exec caddy ls -la /var/www/html/uploads/
+        docker compose exec -T app ls -la /usr/src/app/public/uploads/
+        docker compose exec -T caddy ls -la /var/www/html/uploads/
         
         # Test that both containers can see the same directory
-        docker compose exec app touch /usr/src/app/public/uploads/test-file.txt
-        docker compose exec caddy ls /var/www/html/uploads/test-file.txt
+        docker compose exec -T app touch /usr/src/app/public/uploads/test-file.txt
+        docker compose exec -T caddy ls /var/www/html/uploads/test-file.txt
         
         echo "✅ File upload directory test passed"
 
