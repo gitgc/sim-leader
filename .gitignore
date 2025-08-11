@@ -1,3 +1,6 @@
+# Environment and configuration
+.env
+
 # Logs
 logs
 *.log
@@ -176,7 +179,13 @@ Dockerfile.dev
 test-results/
 coverage/
 
+# Caddy
+caddy_data/
+caddy_config/
+caddy_logs/
+
 # Misc
 *.tgz
 *.tar.gz
 .nyc_output
+*.env

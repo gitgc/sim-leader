@@ -1,6 +1,12 @@
+# Reusable configuration blocks
+x-healthcheck-defaults: &healthcheck-defaults
+  interval: 30s
+  timeout: 10s
+  retries: 3
+
 services:
   db:
-    image: postgres:latest
+    image: postgres:17
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
@@ -8,17 +14,16 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - 5432:5432
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      <<: *healthcheck-defaults
+      test: [CMD-SHELL, "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+    networks:
+      - app-network
 
   app:
     build: .
-    ports:
-      - "3001:3001"
     environment:
       - DB_HOST=db
       - DB_NAME=${DB_NAME}
@@ -27,14 +32,59 @@ services:
       - PORT=${PORT}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_CALLBACK_URL=${GOOGLE_CALLBACK_URL}
       - SESSION_SECRET=${SESSION_SECRET}
       - AUTHORIZED_EMAILS=${AUTHORIZED_EMAILS}
     volumes:
-      - ./public/uploads:/usr/src/app/public/uploads
+      - uploads_shared:/usr/src/app/public/uploads
     depends_on:
       db:
         condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: [CMD-SHELL, "curl -f http://localhost:${PORT}/ || exit 1"]
+    networks:
+      - app-network
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      - DOMAIN=${DOMAIN:-localhost}
+      - CADDY_EMAIL=${CADDY_EMAIL}
+      - DIGITALOCEAN_API_TOKEN=${DIGITALOCEAN_API_TOKEN}
+    volumes:
+      # Choose one Caddyfile based on your deployment mode:
+      # For HTTP mode (development/testing):
+      # - ./Caddyfile.http:/etc/caddy/Caddyfile:ro
+      # For HTTPS local mode (self-signed certificates):
+      # - ./Caddyfile.https-local:/etc/caddy/Caddyfile:ro  
+      # For HTTPS production mode (Let's Encrypt):
+      # - ./Caddyfile.https-production:/etc/caddy/Caddyfile:ro
+      - ./Caddyfile.http:/etc/caddy/Caddyfile:ro
+      - uploads_shared:/var/www/html/uploads:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      - caddy_logs:/var/log/caddy
+    depends_on:
+      app:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-network
 
 volumes:
   db_data:
+  caddy_data:
+  caddy_config:
+  caddy_logs:
+  uploads_shared:
+
+networks:
+  app-network:
+    driver: bridge
