@@ -63,7 +63,7 @@ nano .env
 
 ### 4. Configure Load Balancer Mode
 
-The application includes a Caddy load balancer with three different configuration files. Choose the appropriate Caddyfile for your deployment mode by editing the docker-compose.yml file.
+The application includes a Caddy load balancer with two different configuration files. Choose the appropriate Caddyfile for your deployment mode by editing the docker-compose.yml file.
 
 #### Available Modes
 
@@ -81,21 +81,7 @@ The application includes a Caddy load balancer with three different configuratio
 - Perfect for local development and testing
 - No additional configuration required
 
-##### 2. HTTPS Local Mode (Development with SSL)
-
-**Caddyfile**: `config/Caddyfile.https-local`
-
-```yaml
-# In docker-compose.yml, use:
-- ./config/Caddyfile.https-local:/etc/caddy/Caddyfile:ro
-```
-
-- Serves on `https://localhost`
-- Uses self-signed certificates (browser warning expected)
-- Good for testing HTTPS features locally
-- No additional configuration required
-
-##### 3. HTTPS Production Mode (Let's Encrypt)
+##### 2. HTTPS Production Mode (Let's Encrypt)
 
 **Caddyfile**: `config/Caddyfile.https-production`
 
@@ -120,9 +106,8 @@ The application includes a Caddy load balancer with three different configuratio
 ```yaml
 # In docker-compose.yml caddy service:
 volumes:
-  # Comment out other modes:
+  # Comment out HTTP mode:
   # - ./config/Caddyfile.http:/etc/caddy/Caddyfile:ro
-  # - ./config/Caddyfile.https-local:/etc/caddy/Caddyfile:ro  
   # Uncomment production mode:
   - ./config/Caddyfile.https-production:/etc/caddy/Caddyfile:ro
 ```
@@ -236,7 +221,6 @@ sim-leader/
 │   └── uploads/          # User-uploaded files (local dev only)
 ├── config/
 │   ├── Caddyfile.http           # HTTP mode configuration
-│   ├── Caddyfile.https-local    # HTTPS local mode configuration  
 │   └── Caddyfile.https-production # HTTPS production mode configuration
 ├── docker-compose.yml    # Multi-service orchestration
 ├── .env.example         # Environment template

@@ -129,6 +129,37 @@ describe('API Integration Tests', () => {
         res.status(500).json({ error: 'Error fetching race settings' })
       }
     })
+
+    app.post(
+      '/race-settings/clear-next-race',
+      (req, res, next) => {
+        // Mock authentication check
+        if (!req.isAuthenticated()) {
+          return res.status(401).json({ error: 'Authentication required' })
+        }
+        next()
+      },
+      async (_req, res) => {
+        try {
+          let settings = await RaceSettings.findOne()
+          if (!settings) {
+            settings = await RaceSettings.create({})
+          }
+
+          // Clear all race settings
+          await settings.update({
+            nextRaceLocation: null,
+            nextRaceDate: null,
+            raceDescription: null,
+            circuitImage: null,
+          })
+
+          res.json(settings)
+        } catch (_error) {
+          res.status(500).json({ error: 'Error clearing next race' })
+        }
+      }
+    )
   })
 
   afterAll(async () => {
@@ -265,6 +296,147 @@ describe('API Integration Tests', () => {
 
       expect(response.body.nextRaceLocation).toBe('Monaco Grand Prix')
       expect(response.body.raceDescription).toBe('The prestigious Monaco GP')
+    })
+  })
+
+  describe('POST /race-settings/clear-next-race', () => {
+    test('should return 401 when user is not authenticated', async () => {
+      const response = await request(app).post('/race-settings/clear-next-race').expect(401)
+
+      expect(response.body).toEqual({ error: 'Authentication required' })
+    })
+
+    test('should return 401 for logged out user', async () => {
+      // Create mock app that simulates logged out user
+      const mockApp = express()
+      mockApp.use(express.json())
+      mockApp.use((req, _res, next) => {
+        req.isAuthenticated = () => false
+        req.user = null
+        next()
+      })
+
+      mockApp.post(
+        '/race-settings/clear-next-race',
+        (req, res, next) => {
+          // Mock authentication check
+          if (!req.isAuthenticated()) {
+            return res.status(401).json({ error: 'Authentication required' })
+          }
+          next()
+        },
+        async (_req, res) => {
+          res.json({ message: 'This should not be reached' })
+        }
+      )
+
+      const response = await request(mockApp).post('/race-settings/clear-next-race').expect(401)
+
+      expect(response.body).toEqual({ error: 'Authentication required' })
+    })
+
+    test('should successfully clear all race settings when user is authenticated', async () => {
+      // Create test race settings with data
+      const RaceSettings = sequelize.models.raceSettings
+      const testSettings = await RaceSettings.create({
+        nextRaceLocation: 'Monaco Grand Prix',
+        nextRaceDate: new Date('2024-05-26T14:00:00Z'),
+        raceDescription: 'The prestigious Monaco GP',
+        circuitImage: '/uploads/monaco.jpg',
+      })
+
+      // Verify settings were created with data
+      expect(testSettings.nextRaceLocation).toBe('Monaco Grand Prix')
+      expect(testSettings.raceDescription).toBe('The prestigious Monaco GP')
+
+      // Create mock app with authenticated user
+      const mockApp = express()
+      mockApp.use(express.json())
+      mockApp.use((req, _res, next) => {
+        req.isAuthenticated = () => true
+        req.user = { email: 'admin@test.com' }
+        next()
+      })
+
+      mockApp.post('/race-settings/clear-next-race', async (_req, res) => {
+        try {
+          let settings = await RaceSettings.findOne()
+          if (!settings) {
+            settings = await RaceSettings.create({})
+          }
+
+          // Clear all race settings
+          await settings.update({
+            nextRaceLocation: null,
+            nextRaceDate: null,
+            raceDescription: null,
+            circuitImage: null,
+          })
+
+          res.json(settings)
+        } catch (_error) {
+          res.status(500).json({ error: 'Error clearing race settings' })
+        }
+      })
+
+      const response = await request(mockApp).post('/race-settings/clear-next-race').expect(200)
+
+      // Verify all fields are cleared
+      expect(response.body.nextRaceLocation).toBeNull()
+      expect(response.body.nextRaceDate).toBeNull()
+      expect(response.body.raceDescription).toBeNull()
+      expect(response.body.circuitImage).toBeNull()
+
+      // Verify in database that settings are actually cleared
+      const clearedSettings = await RaceSettings.findOne()
+      expect(clearedSettings.nextRaceLocation).toBeNull()
+      expect(clearedSettings.nextRaceDate).toBeNull()
+      expect(clearedSettings.raceDescription).toBeNull()
+      expect(clearedSettings.circuitImage).toBeNull()
+    })
+
+    test('should handle case when no race settings exist yet', async () => {
+      // Ensure no race settings exist
+      const RaceSettings = sequelize.models.raceSettings
+      await RaceSettings.destroy({ where: {} })
+
+      // Create mock app with authenticated user
+      const mockApp = express()
+      mockApp.use(express.json())
+      mockApp.use((req, _res, next) => {
+        req.isAuthenticated = () => true
+        req.user = { email: 'admin@test.com' }
+        next()
+      })
+
+      mockApp.post('/race-settings/clear-next-race', async (_req, res) => {
+        try {
+          let settings = await RaceSettings.findOne()
+          if (!settings) {
+            settings = await RaceSettings.create({})
+          }
+
+          // Clear all race settings (should be null already)
+          await settings.update({
+            nextRaceLocation: null,
+            nextRaceDate: null,
+            raceDescription: null,
+            circuitImage: null,
+          })
+
+          res.json(settings)
+        } catch (_error) {
+          res.status(500).json({ error: 'Error clearing next race' })
+        }
+      })
+
+      const response = await request(mockApp).post('/race-settings/clear-next-race').expect(200)
+
+      // Verify all fields are null
+      expect(response.body.nextRaceLocation).toBeNull()
+      expect(response.body.nextRaceDate).toBeNull()
+      expect(response.body.raceDescription).toBeNull()
+      expect(response.body.circuitImage).toBeNull()
     })
   })
 
