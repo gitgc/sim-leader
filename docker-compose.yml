@@ -36,8 +36,7 @@ services:
       - SESSION_SECRET=${SESSION_SECRET}
       - AUTHORIZED_EMAILS=${AUTHORIZED_EMAILS}
     volumes:
-      - ./public/uploads:/usr/src/app/public/uploads
-      - caddy_uploads:/var/www/html/uploads
+      - uploads_shared:/usr/src/app/public/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -57,13 +56,16 @@ services:
       - DOMAIN=${DOMAIN:-localhost}
       - CADDY_EMAIL=${CADDY_EMAIL}
       - DIGITALOCEAN_API_TOKEN=${DIGITALOCEAN_API_TOKEN}
-      - CADDY_HTTPS_MODE=${CADDY_HTTPS_MODE:-auto_https on}
-      - CADDY_SITE_ADDRESS=${CADDY_SITE_ADDRESS}
-      - CADDY_ACME_CONFIG=${CADDY_ACME_CONFIG}
-      - CADDY_HSTS_HEADER=${CADDY_HSTS_HEADER}
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - ./public/uploads:/var/www/html/uploads:ro
+      # Choose one Caddyfile based on your deployment mode:
+      # For HTTP mode (development/testing):
+      # - ./Caddyfile.http:/etc/caddy/Caddyfile:ro
+      # For HTTPS local mode (self-signed certificates):
+      # - ./Caddyfile.https-local:/etc/caddy/Caddyfile:ro  
+      # For HTTPS production mode (Let's Encrypt):
+      # - ./Caddyfile.https-production:/etc/caddy/Caddyfile:ro
+      - ./Caddyfile.http:/etc/caddy/Caddyfile:ro
+      - uploads_shared:/var/www/html/uploads:ro
       - caddy_data:/data
       - caddy_config:/config
       - caddy_logs:/var/log/caddy
@@ -81,7 +83,7 @@ volumes:
   caddy_data:
   caddy_config:
   caddy_logs:
-  caddy_uploads:
+  uploads_shared:
 
 networks:
   app-network:

@@ -1,3 +1,6 @@
+# Environment and configuration
+.env
+
 # Logs
 logs
 *.log
@@ -185,3 +188,4 @@ caddy_logs/
 *.tgz
 *.tar.gz
 .nyc_output
+*.env

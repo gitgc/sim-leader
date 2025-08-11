@@ -63,69 +63,76 @@ nano .env
 
 ### 4. Configure Load Balancer Mode
 
-The application includes a Caddy load balancer with flexible HTTP/HTTPS configuration. Use the provided script to easily switch between modes:
+The application includes a Caddy load balancer with three different configuration files. Choose the appropriate Caddyfile for your deployment mode by editing the docker-compose.yml file.
 
 #### Available Modes
 
 ##### 1. HTTP Mode (Development/Testing)
 
-```bash
-./caddy-config.sh http
+**Caddyfile**: `Caddyfile.http`
+
+```yaml
+# In docker-compose.yml, use:
+- ./Caddyfile.http:/etc/caddy/Caddyfile:ro
 ```
 
 - Serves on `http://localhost`
 - No SSL/TLS encryption
 - Perfect for local development and testing
-- No email or domain configuration required
+- No additional configuration required
 
 ##### 2. HTTPS Local Mode (Development with SSL)
 
-```bash
-./caddy-config.sh https-local
+**Caddyfile**: `Caddyfile.https-local`
+
+```yaml
+# In docker-compose.yml, use:
+- ./Caddyfile.https-local:/etc/caddy/Caddyfile:ro
 ```
 
 - Serves on `https://localhost`
 - Uses self-signed certificates (browser warning expected)
 - Good for testing HTTPS features locally
-- No email or domain configuration required
+- No additional configuration required
 
 ##### 3. HTTPS Production Mode (Let's Encrypt)
 
-```bash
-./caddy-config.sh https-production
+**Caddyfile**: `Caddyfile.https-production`
+
+```yaml
+# In docker-compose.yml, use:
+- ./Caddyfile.https-production:/etc/caddy/Caddyfile:ro
 ```
 
 - Serves on your actual domain with Let's Encrypt certificates
 - Automatic SSL/TLS with trusted certificates
-- Requires domain, email, and DigitalOcean API token configuration
+- Requires domain, email, and DigitalOcean API token in .env file
 - Production-ready with HSTS and security headers
 
-#### Configuration Script Usage
+#### How to Switch Modes
 
-The `caddy-config.sh` script automatically updates your `.env` file with the appropriate settings:
+1. **Edit docker-compose.yml**: Uncomment the desired Caddyfile line in the caddy service volumes section
+2. **For production mode**: Ensure DOMAIN, CADDY_EMAIL, and DIGITALOCEAN_API_TOKEN are set in your .env file
+3. **Restart services**: Run `docker compose down && docker compose up --build -d`
 
-```bash
-# Make the script executable (first time only)
-chmod +x caddy-config.sh
+#### Example: Switching to HTTPS Production
 
-# Choose your mode
-./caddy-config.sh http                 # HTTP only
-./caddy-config.sh https-local          # HTTPS with self-signed certs  
-./caddy-config.sh https-production     # HTTPS with Let's Encrypt
-
-# Then start the stack
-docker compose up --build -d
+```yaml
+# In docker-compose.yml caddy service:
+volumes:
+  # Comment out other modes:
+  # - ./Caddyfile.http:/etc/caddy/Caddyfile:ro
+  # - ./Caddyfile.https-local:/etc/caddy/Caddyfile:ro  
+  # Uncomment production mode:
+  - ./Caddyfile.https-production:/etc/caddy/Caddyfile:ro
 ```
 
-#### What the Script Does
-
-- **HTTP Mode**: Sets `CADDY_HTTPS_MODE=auto_https off` and `CADDY_SITE_ADDRESS=http://localhost`
-- **HTTPS Local**: Sets `CADDY_HTTPS_MODE=auto_https on` and `CADDY_SITE_ADDRESS=https://localhost`
-- **HTTPS Production**: Configures Let's Encrypt with DigitalOcean DNS challenge
+Then restart: `docker compose down && docker compose up --build -d`
 
 ### 5. Start the Application Stack
 
 **Development (Local):**
+
 ```bash
 # Start only the database
 docker compose up db -d
@@ -135,13 +142,13 @@ npm start
 ```
 
 **Production (Full Stack with Caddy):**
-```bash
-# Configure Caddy mode first (choose one):
-./caddy-config.sh http                 # HTTP only (testing)
-./caddy-config.sh https-local          # HTTPS with self-signed certs
-./caddy-config.sh https-production     # HTTPS with Let's Encrypt
 
-# Then build and start the stack
+1. **Configure Caddy mode**: Edit docker-compose.yml to use the desired Caddyfile
+2. **For production mode**: Ensure DOMAIN, CADDY_EMAIL, and DIGITALOCEAN_API_TOKEN are set in .env
+3. **Build and start**:
+
+```bash
+# Build and start the full stack
 docker compose up --build
 
 # Or run in detached mode
@@ -226,11 +233,36 @@ sim-leader/
 │   ├── index.html        # Main UI
 │   ├── styles.css        # F1-themed styling
 │   ├── script.js         # Frontend logic
-│   └── uploads/          # User-uploaded files
-├── docker-compose.yml    # PostgreSQL setup
-├── .env.example          # Environment template
-└── README.md            # This file
+│   └── uploads/          # User-uploaded files (local dev only)
+├── docker-compose.yml    # Multi-service orchestration
+├── Caddyfile            # Load balancer configuration
+├── Caddyfile.http           # HTTP mode configuration
+├── Caddyfile.https-local    # HTTPS local mode configuration  
+├── Caddyfile.https-production # HTTPS production mode configuration
+├── .env.example         # Environment template
+└── README.md           # This file
 ```
+
+## Docker Architecture
+
+### Volume Management
+
+The application uses Docker named volumes for persistent data storage:
+
+- **`uploads_shared`**: Shared volume between app and Caddy services for user-uploaded files
+  - App container: `/usr/src/app/public/uploads` (read/write)
+  - Caddy container: `/var/www/html/uploads` (read-only)
+  - Ensures file synchronization and eliminates conflicts
+- **`db_data`**: PostgreSQL database files
+- **`caddy_data`**: Caddy certificates and configuration data
+- **`caddy_config`**: Caddy runtime configuration
+- **`caddy_logs`**: Caddy access and error logs
+
+### Service Communication
+
+- **App** ↔ **Database**: Internal Docker network communication
+- **Caddy** → **App**: Load balancer proxies requests to app service
+- **External** → **Caddy**: Public HTTP/HTTPS endpoints
 
 ## Technologies Used
 
@@ -280,10 +312,17 @@ This project is for educational and personal use.
 
 ### Environment Configuration
 
+**Caddy configuration issues:**
+
+- Ensure the correct Caddyfile is mounted in docker-compose.yml
+- For production mode, verify DOMAIN, CADDY_EMAIL, and DIGITALOCEAN_API_TOKEN are set in .env
+- Check that only one Caddyfile volume mount is uncommented
+- Restart services after changing Caddyfile: `docker compose down && docker compose up --build -d`
+
 **Missing CADDY_EMAIL error:**
 
-- Run the configuration script: `./caddy-config.sh https-production`
-- Or manually add `CADDY_EMAIL=your-email@example.com` to .env
+- Ensure CADDY_EMAIL is set in your .env file for production mode
+- Only required when using Caddyfile.https-production
 
 **Database connection issues:**
 
@@ -293,6 +332,21 @@ This project is for educational and personal use.
 
 ### General Issues
 
+**Migrating from local uploads directory:**
+
+If you have existing files in `./public/uploads/`, you'll need to copy them to the new shared volume:
+
+```bash
+# Start the services to create the volume
+docker compose up -d
+
+# Copy existing uploads to the shared volume
+docker cp ./public/uploads/. $(docker compose ps -q app):/usr/src/app/public/uploads/
+
+# Restart services to ensure proper mounting
+docker compose restart
+```
+
 **Application won't start:**
 
 - Check all containers are running: `docker compose ps`
@@ -301,9 +355,10 @@ This project is for educational and personal use.
 
 **Profile picture uploads fail:**
 
-- Check uploads directory permissions
-- Verify UPLOAD_PATH is correctly set
-- Ensure app container has write access to upload volume
+- Check uploads directory permissions in the shared volume
+- Verify the `uploads_shared` volume is properly mounted
+- Ensure app container has write access to the shared upload volume
+- Check app logs for upload-related errors: `docker compose logs app`
 
 ## Support
 
