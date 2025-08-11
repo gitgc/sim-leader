@@ -130,32 +130,36 @@ describe('API Integration Tests', () => {
       }
     })
 
-    app.post('/race-settings/clear-next-race', (req, res, next) => {
-      // Mock authentication check
-      if (!req.isAuthenticated()) {
-        return res.status(401).json({ error: 'Authentication required' })
-      }
-      next()
-    }, async (_req, res) => {
-      try {
-        let settings = await RaceSettings.findOne()
-        if (!settings) {
-          settings = await RaceSettings.create({})
+    app.post(
+      '/race-settings/clear-next-race',
+      (req, res, next) => {
+        // Mock authentication check
+        if (!req.isAuthenticated()) {
+          return res.status(401).json({ error: 'Authentication required' })
         }
+        next()
+      },
+      async (_req, res) => {
+        try {
+          let settings = await RaceSettings.findOne()
+          if (!settings) {
+            settings = await RaceSettings.create({})
+          }
 
-        // Clear all race settings
-        await settings.update({
-          nextRaceLocation: null,
-          nextRaceDate: null,
-          raceDescription: null,
-          circuitImage: null,
-        })
+          // Clear all race settings
+          await settings.update({
+            nextRaceLocation: null,
+            nextRaceDate: null,
+            raceDescription: null,
+            circuitImage: null,
+          })
 
-        res.json(settings)
-      } catch (_error) {
-        res.status(500).json({ error: 'Error clearing next race' })
+          res.json(settings)
+        } catch (_error) {
+          res.status(500).json({ error: 'Error clearing next race' })
+        }
       }
-    })
+    )
   })
 
   afterAll(async () => {
@@ -297,9 +301,7 @@ describe('API Integration Tests', () => {
 
   describe('POST /race-settings/clear-next-race', () => {
     test('should return 401 when user is not authenticated', async () => {
-      const response = await request(app)
-        .post('/race-settings/clear-next-race')
-        .expect(401)
+      const response = await request(app).post('/race-settings/clear-next-race').expect(401)
 
       expect(response.body).toEqual({ error: 'Authentication required' })
     })
@@ -314,19 +316,21 @@ describe('API Integration Tests', () => {
         next()
       })
 
-      mockApp.post('/race-settings/clear-next-race', (req, res, next) => {
-        // Mock authentication check
-        if (!req.isAuthenticated()) {
-          return res.status(401).json({ error: 'Authentication required' })
+      mockApp.post(
+        '/race-settings/clear-next-race',
+        (req, res, next) => {
+          // Mock authentication check
+          if (!req.isAuthenticated()) {
+            return res.status(401).json({ error: 'Authentication required' })
+          }
+          next()
+        },
+        async (_req, res) => {
+          res.json({ message: 'This should not be reached' })
         }
-        next()
-      }, async (_req, res) => {
-        res.json({ message: 'This should not be reached' })
-      })
+      )
 
-      const response = await request(mockApp)
-        .post('/race-settings/clear-next-race')
-        .expect(401)
+      const response = await request(mockApp).post('/race-settings/clear-next-race').expect(401)
 
       expect(response.body).toEqual({ error: 'Authentication required' })
     })
@@ -375,9 +379,7 @@ describe('API Integration Tests', () => {
         }
       })
 
-      const response = await request(mockApp)
-        .post('/race-settings/clear-next-race')
-        .expect(200)
+      const response = await request(mockApp).post('/race-settings/clear-next-race').expect(200)
 
       // Verify all fields are cleared
       expect(response.body.nextRaceLocation).toBeNull()
@@ -428,9 +430,7 @@ describe('API Integration Tests', () => {
         }
       })
 
-      const response = await request(mockApp)
-        .post('/race-settings/clear-next-race')
-        .expect(200)
+      const response = await request(mockApp).post('/race-settings/clear-next-race').expect(200)
 
       // Verify all fields are null
       expect(response.body.nextRaceLocation).toBeNull()
