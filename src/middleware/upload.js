@@ -1,15 +1,17 @@
 const multer = require('multer')
 const path = require('node:path')
 const fs = require('node:fs')
+const { v4: uuidv4 } = require('uuid')
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (_req, file, cb) => {
     let uploadDir
     if (file.fieldname === 'circuitImage') {
-      uploadDir = path.join(__dirname, '../../public/uploads/circuits')
+      uploadDir = path.join(__dirname, '../../public/uploads/images-circuit')
     } else {
-      uploadDir = path.join(__dirname, '../../public/uploads')
+      // For profilePicture and other driver-related images
+      uploadDir = path.join(__dirname, '../../public/uploads/images-driver')
     }
 
     // Ensure upload directory exists
@@ -19,9 +21,10 @@ const storage = multer.diskStorage({
     cb(null, uploadDir)
   },
   filename: (_req, file, cb) => {
-    // Generate unique filename
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`
-    cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`)
+    // Generate GUID-based filename to avoid weird characters
+    const guid = uuidv4()
+    const extension = path.extname(file.originalname).toLowerCase()
+    cb(null, `${guid}${extension}`)
   },
 })
 

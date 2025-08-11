@@ -1,5 +1,6 @@
 import { checkAuthStatus, logout } from './auth.js'
 import { deleteDriver, deleteProfilePicture, setupFormEventListeners } from './forms.js'
+import { initializeImagePreviews } from './imagePreview.js'
 import { loadLeaderboard } from './leaderboard.js'
 import {
   closeAddDriverModal,
@@ -10,6 +11,7 @@ import {
   showEditDriverModal,
   showSettingsModal,
   triggerCircuitImageUpload,
+  triggerEditFileUpload,
   triggerFileUpload,
 } from './modals.js'
 import {
@@ -26,6 +28,7 @@ function initializeApp() {
   loadRaceSettings()
   loadLeaderboard()
   setupEventListeners()
+  initializeImagePreviews()
 }
 
 // Setup all event listeners
@@ -130,6 +133,9 @@ function handleAction(action) {
       break
     case 'triggerFileUpload':
       triggerFileUpload()
+      break
+    case 'triggerEditFileUpload':
+      triggerEditFileUpload()
       break
     case 'deleteProfilePicture':
       deleteProfilePicture()
