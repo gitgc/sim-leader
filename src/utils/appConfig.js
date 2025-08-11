@@ -1,7 +1,7 @@
 const express = require('express')
 const path = require('node:path')
 const session = require('express-session')
-const { passport } = require('./config/auth')
+const { passport } = require('../config/auth')
 
 function configureApp() {
   const app = express()
