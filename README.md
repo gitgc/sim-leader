@@ -69,11 +69,11 @@ The application includes a Caddy load balancer with three different configuratio
 
 ##### 1. HTTP Mode (Development/Testing)
 
-**Caddyfile**: `Caddyfile.http`
+**Caddyfile**: `config/Caddyfile.http`
 
 ```yaml
 # In docker-compose.yml, use:
-- ./Caddyfile.http:/etc/caddy/Caddyfile:ro
+- ./config/Caddyfile.http:/etc/caddy/Caddyfile:ro
 ```
 
 - Serves on `http://localhost`
@@ -83,11 +83,11 @@ The application includes a Caddy load balancer with three different configuratio
 
 ##### 2. HTTPS Local Mode (Development with SSL)
 
-**Caddyfile**: `Caddyfile.https-local`
+**Caddyfile**: `config/Caddyfile.https-local`
 
 ```yaml
 # In docker-compose.yml, use:
-- ./Caddyfile.https-local:/etc/caddy/Caddyfile:ro
+- ./config/Caddyfile.https-local:/etc/caddy/Caddyfile:ro
 ```
 
 - Serves on `https://localhost`
@@ -97,11 +97,11 @@ The application includes a Caddy load balancer with three different configuratio
 
 ##### 3. HTTPS Production Mode (Let's Encrypt)
 
-**Caddyfile**: `Caddyfile.https-production`
+**Caddyfile**: `config/Caddyfile.https-production`
 
 ```yaml
 # In docker-compose.yml, use:
-- ./Caddyfile.https-production:/etc/caddy/Caddyfile:ro
+- ./config/Caddyfile.https-production:/etc/caddy/Caddyfile:ro
 ```
 
 - Serves on your actual domain with Let's Encrypt certificates
@@ -121,10 +121,10 @@ The application includes a Caddy load balancer with three different configuratio
 # In docker-compose.yml caddy service:
 volumes:
   # Comment out other modes:
-  # - ./Caddyfile.http:/etc/caddy/Caddyfile:ro
-  # - ./Caddyfile.https-local:/etc/caddy/Caddyfile:ro  
+  # - ./config/Caddyfile.http:/etc/caddy/Caddyfile:ro
+  # - ./config/Caddyfile.https-local:/etc/caddy/Caddyfile:ro  
   # Uncomment production mode:
-  - ./Caddyfile.https-production:/etc/caddy/Caddyfile:ro
+  - ./config/Caddyfile.https-production:/etc/caddy/Caddyfile:ro
 ```
 
 Then restart: `docker compose down && docker compose up --build -d`
@@ -234,11 +234,11 @@ sim-leader/
 │   ├── styles.css        # F1-themed styling
 │   ├── script.js         # Frontend logic
 │   └── uploads/          # User-uploaded files (local dev only)
+├── config/
+│   ├── Caddyfile.http           # HTTP mode configuration
+│   ├── Caddyfile.https-local    # HTTPS local mode configuration  
+│   └── Caddyfile.https-production # HTTPS production mode configuration
 ├── docker-compose.yml    # Multi-service orchestration
-├── Caddyfile            # Load balancer configuration
-├── Caddyfile.http           # HTTP mode configuration
-├── Caddyfile.https-local    # HTTPS local mode configuration  
-├── Caddyfile.https-production # HTTPS production mode configuration
 ├── .env.example         # Environment template
 └── README.md           # This file
 ```
