@@ -7,11 +7,11 @@ RUN apk add --no-cache curl
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
-# Copy package*.json files
+# Copy package files for dependency installation
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install dependencies (production only)
+RUN npm ci --omit=dev && npm cache clean --force
 
 # Copy the rest of the application code
 COPY . .

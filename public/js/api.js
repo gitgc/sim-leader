@@ -24,7 +24,7 @@ export async function logoutUser() {
 
 // Leaderboard API calls
 export async function fetchLeaderboard() {
-  const response = await fetch(`${API_BASE_URL}/leaderboard`)
+  const response = await fetch(`${API_BASE_URL}/api/leaderboard`)
   if (!response.ok) {
     throw new Error('Failed to load leaderboard')
   }
@@ -32,7 +32,7 @@ export async function fetchLeaderboard() {
 }
 
 export async function createDriver(driverData) {
-  const response = await fetch(`${API_BASE_URL}/leaderboard`, {
+  const response = await fetch(`${API_BASE_URL}/api/leaderboard`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -49,7 +49,7 @@ export async function createDriver(driverData) {
 }
 
 export async function updateDriver(driverId, driverData) {
-  const response = await fetch(`${API_BASE_URL}/leaderboard/${driverId}`, {
+  const response = await fetch(`${API_BASE_URL}/api/leaderboard/${driverId}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -66,7 +66,7 @@ export async function updateDriver(driverId, driverData) {
 }
 
 export async function deleteDriver(driverId) {
-  const response = await fetch(`${API_BASE_URL}/leaderboard/${driverId}`, {
+  const response = await fetch(`${API_BASE_URL}/api/leaderboard/${driverId}`, {
     method: 'DELETE',
   })
 
@@ -83,7 +83,7 @@ export async function uploadProfilePicture(driverId, file) {
   const formData = new FormData()
   formData.append('profilePicture', file)
 
-  const response = await fetch(`${API_BASE_URL}/leaderboard/${driverId}/profile-picture`, {
+  const response = await fetch(`${API_BASE_URL}/api/leaderboard/${driverId}/profile-picture`, {
     method: 'POST',
     body: formData,
   })
@@ -97,7 +97,7 @@ export async function uploadProfilePicture(driverId, file) {
 }
 
 export async function deleteProfilePicture(driverId) {
-  const response = await fetch(`${API_BASE_URL}/leaderboard/${driverId}/profile-picture`, {
+  const response = await fetch(`${API_BASE_URL}/api/leaderboard/${driverId}/profile-picture`, {
     method: 'DELETE',
   })
 
@@ -111,7 +111,7 @@ export async function deleteProfilePicture(driverId) {
 
 // Race settings API calls
 export async function fetchRaceSettings() {
-  const response = await fetch(`${API_BASE_URL}/race-settings`)
+  const response = await fetch(`${API_BASE_URL}/api/race-settings`)
   if (!response.ok) {
     throw new Error('Failed to load race settings')
   }
@@ -119,7 +119,7 @@ export async function fetchRaceSettings() {
 }
 
 export async function updateRaceSettings(settingsData) {
-  const response = await fetch(`${API_BASE_URL}/race-settings`, {
+  const response = await fetch(`${API_BASE_URL}/api/race-settings`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -139,7 +139,7 @@ export async function uploadCircuitImage(file) {
   const formData = new FormData()
   formData.append('circuitImage', file)
 
-  const response = await fetch(`${API_BASE_URL}/race-settings/circuit-image`, {
+  const response = await fetch(`${API_BASE_URL}/api/race-settings/circuit-image`, {
     method: 'POST',
     body: formData,
   })
@@ -153,7 +153,7 @@ export async function uploadCircuitImage(file) {
 }
 
 export async function deleteCircuitImage() {
-  const response = await fetch(`${API_BASE_URL}/race-settings/circuit-image`, {
+  const response = await fetch(`${API_BASE_URL}/api/race-settings/circuit-image`, {
     method: 'DELETE',
   })
 
@@ -166,7 +166,7 @@ export async function deleteCircuitImage() {
 }
 
 export async function clearNextRace() {
-  const response = await fetch(`${API_BASE_URL}/race-settings/clear-next-race`, {
+  const response = await fetch(`${API_BASE_URL}/api/race-settings/clear-next-race`, {
     method: 'POST',
   })
 

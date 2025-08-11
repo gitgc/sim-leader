@@ -1,5 +1,6 @@
 const passport = require('passport')
 const GoogleStrategy = require('passport-google-oauth20').Strategy
+const logger = require('../utils/logger')
 
 // Configure Google OAuth strategy
 passport.use(
@@ -19,8 +20,10 @@ passport.use(
           photo: profile.photos[0].value,
         }
 
+        logger.logAuth('login', user, true, { provider: 'Google' })
         return done(null, user)
       } catch (error) {
+        logger.logAuth('login', null, false, { provider: 'Google', error: error.message })
         return done(error, null)
       }
     }
