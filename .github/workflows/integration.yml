@@ -1,0 +1,195 @@
+name: Integration Tests
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  workflow_dispatch: # Allow manual triggers
+
+jobs:
+  docker-compose-integration:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Create test environment file
+      run: |
+        cat > .env << EOF
+        # Database configuration
+        DB_NAME=sim_leader_test
+        DB_USER=postgres
+        DB_PASSWORD=test_password_123
+        DB_HOST=localhost
+        DB_PORT=5432
+        
+        # Application configuration  
+        PORT=3001
+        NODE_ENV=test
+        
+        # Google OAuth (test/dummy values)
+        GOOGLE_CLIENT_ID=test_client_id
+        GOOGLE_CLIENT_SECRET=test_client_secret
+        GOOGLE_CALLBACK_URL=http://localhost/auth/google/callback
+        
+        # Session configuration
+        SESSION_SECRET=test_session_secret_key_for_integration_tests_12345
+        
+        # Authorization (test emails)
+        AUTHORIZED_EMAILS=test@example.com,admin@example.com
+        
+        # Caddy configuration (HTTP mode)
+        DOMAIN=localhost
+        CADDY_EMAIL=
+        DIGITALOCEAN_API_TOKEN=
+        EOF
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build and start services with health check wait
+      run: |
+        echo "🚀 Starting Docker Compose stack in HTTP mode..."
+        # --wait flag waits for all services to pass their health checks before proceeding
+        docker compose up -d --build --wait
+        echo "✅ All services are healthy and ready!"
+        docker compose ps
+
+    - name: Test database connectivity
+      run: |
+        echo "🔍 Testing database connectivity..."
+        
+        # Test PostgreSQL connection
+        docker compose exec -T db pg_isready -U postgres -d sim_leader_test
+        
+        # Test that we can connect and query
+        docker compose exec -T db psql -U postgres -d sim_leader_test -c "SELECT version();"
+        
+        echo "✅ Database connectivity test passed"
+
+    - name: Test application health
+      run: |
+        echo "🔍 Testing application health..."
+        
+        # Test that the app responds on its direct port
+        docker compose exec -T app curl -f http://localhost:3001/ -o /dev/null -s
+        
+        # Test internal application endpoints
+        docker compose exec -T app curl -f http://localhost:3001/race-settings -o /dev/null -s
+        
+        echo "✅ Application health test passed"
+
+    - name: Test Caddy reverse proxy
+      run: |
+        echo "🔍 Testing Caddy reverse proxy..."
+        
+        # Test HTTP endpoint through Caddy (port 80)
+        curl -f http://localhost/ -o /dev/null -s -v
+        
+        # Test API endpoints through Caddy
+        curl -f http://localhost/race-settings -o /dev/null -s
+        
+        # Test that we get proper headers from Caddy
+        response_headers=$(curl -I http://localhost/ 2>/dev/null)
+        
+        # Check for security headers that Caddy should add
+        echo "$response_headers" | grep -i "x-content-type-options: nosniff" || {
+          echo "❌ Missing security header: X-Content-Type-Options"
+          echo "Response headers:"
+          echo "$response_headers"
+          exit 1
+        }
+        
+        echo "✅ Caddy reverse proxy test passed"
+
+    - name: Test full application flow
+      run: |
+        echo "🔍 Testing full application flow..."
+        
+        # Test main page loads
+        main_page=$(curl -s http://localhost/)
+        echo "$main_page" | grep -q "Formula Evergreen Championship" || {
+          echo "❌ Main page doesn't contain expected title"
+          echo "Page content:"
+          echo "$main_page"
+          exit 1
+        }
+        
+        # Test API endpoints return valid JSON
+        race_settings=$(curl -s http://localhost/race-settings)
+        echo "$race_settings" | jq . > /dev/null || {
+          echo "❌ Race settings endpoint doesn't return valid JSON"
+          echo "Response:"
+          echo "$race_settings"
+          exit 1
+        }
+        
+        # Test leaderboard endpoint
+        leaderboard=$(curl -s http://localhost/leaderboard)
+        echo "$leaderboard" | jq . > /dev/null || {
+          echo "❌ Leaderboard endpoint doesn't return valid JSON"
+          echo "Response:"
+          echo "$leaderboard"
+          exit 1
+        }
+        
+        echo "✅ Full application flow test passed"
+
+    - name: Test file upload directory
+      run: |
+        echo "🔍 Testing file upload directory..."
+        
+        # Check that uploads directory is properly mounted and accessible
+        docker compose exec -T app ls -la /usr/src/app/public/uploads/
+        docker compose exec -T caddy ls -la /var/www/html/uploads/
+        
+        # Test that both containers can see the same directory
+        docker compose exec -T app touch /usr/src/app/public/uploads/test-file.txt
+        docker compose exec -T caddy ls /var/www/html/uploads/test-file.txt
+        
+        echo "✅ File upload directory test passed"
+
+    - name: Test service restart resilience
+      run: |
+        echo "🔍 Testing service restart resilience..."
+        
+        # Restart the app service and wait for it to be healthy
+        docker compose restart app
+        docker compose up -d --wait
+        
+        echo "✅ App service restarted successfully"
+        
+        # Test that Caddy still works after app restart
+        curl -f http://localhost/ -o /dev/null -s
+        
+        echo "✅ Service restart resilience test passed"
+
+    - name: Show service logs on failure
+      if: failure()
+      run: |
+        echo "❌ Integration tests failed. Showing service logs..."
+        echo ""
+        echo "=== Service Status ==="
+        docker compose ps
+        echo ""
+        echo "=== App Logs ==="
+        docker compose logs app
+        echo ""
+        echo "=== Database Logs ==="
+        docker compose logs db
+        echo ""
+        echo "=== Caddy Logs ==="
+        docker compose logs caddy
+        echo ""
+        echo "=== Docker System Info ==="
+        docker system df
+        docker system events --since 10m --until now || true
+
+    - name: Cleanup
+      if: always()
+      run: |
+        echo "🧹 Cleaning up..."
+        docker compose down -v --remove-orphans
+        docker system prune -f
