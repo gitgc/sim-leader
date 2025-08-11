@@ -3,19 +3,10 @@ name: Deploy
 on:
   push:
     branches: [ main ]
-  workflow_run:
-    workflows: ["Tests"]
-    types:
-      - completed
-    branches: [ main ]
 
 jobs:
   docker-build-and-publish:
     runs-on: ubuntu-latest
-    # Only run when the CI workflow completed successfully
-    if: |
-      github.event_name == 'push' || 
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     
     permissions:
       contents: write  # Required to push commits and create releases
