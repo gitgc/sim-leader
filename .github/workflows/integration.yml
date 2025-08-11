@@ -74,10 +74,10 @@ jobs:
         echo "🔍 Testing application health..."
         
         # Test that the app responds on its direct port
-        docker compose exec app curl -f http://localhost:3001/ -o /dev/null -s
+        docker compose exec -T app curl -f http://localhost:3001/ -o /dev/null -s
         
         # Test internal application endpoints
-        docker compose exec app curl -f http://localhost:3001/race-settings -o /dev/null -s
+        docker compose exec -T app curl -f http://localhost:3001/race-settings -o /dev/null -s
         
         echo "✅ Application health test passed"
 
