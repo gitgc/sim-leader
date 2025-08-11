@@ -162,8 +162,8 @@ logger.logFileOperation = (operation, filename, success = true, details = {}) =>
   })
 }
 
-// In development, also log to debug level
-if (process.env.NODE_ENV === 'development') {
+// In development, set log level to debug only if LOG_LEVEL is not explicitly set
+if (process.env.NODE_ENV === 'development' && !process.env.LOG_LEVEL) {
   logger.level = 'debug'
 }
 
