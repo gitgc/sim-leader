@@ -131,7 +131,7 @@ export async function deleteDriver(driverId) {
 async function uploadProfilePictureForDriver(driverId, file) {
   try {
     const result = await uploadProfilePicture(driverId, file)
-    
+
     // If we're in the edit modal, update the current picture display immediately
     const editDriverId = document.getElementById('editDriverId')
     if (editDriverId && editDriverId.value === driverId.toString()) {
@@ -139,7 +139,7 @@ async function uploadProfilePictureForDriver(driverId, file) {
       // Clear the preview since we now show the actual uploaded image
       clearPreview('editPicturePreviewContainer', 'editPicturePreview')
     }
-    
+
     // Also clear preview for add modal if applicable
     const addModal = document.getElementById('addDriverModal')
     if (addModal && addModal.style.display === 'block') {
@@ -160,11 +160,11 @@ function updateEditModalProfilePicture(profilePictureUrl) {
   if (currentPicture && profilePictureUrl) {
     currentPicture.src = profilePictureUrl
     currentPicture.style.display = 'block'
-    
+
     if (noPictureText) {
       noPictureText.style.display = 'none'
     }
-    
+
     if (deletePictureBtn) {
       deletePictureBtn.style.display = 'inline-flex'
     }

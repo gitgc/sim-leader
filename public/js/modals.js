@@ -1,4 +1,4 @@
-import { clearAllPreviews, clearPreview } from './imagePreview.js'
+import { clearPreview } from './imagePreview.js'
 import { showNotification } from './notifications.js'
 import { findDriverById, getIsAuthorized } from './state.js'
 

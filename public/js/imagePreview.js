@@ -1,6 +1,7 @@
 // Image preview functionality for profile pictures
-import { showNotification } from './notifications.js'
+
 import { uploadCircuitImage } from './api.js'
+import { showNotification } from './notifications.js'
 import { loadRaceSettings, populateSettingsModal } from './settings.js'
 
 /**
@@ -15,13 +16,12 @@ export function setupImagePreview(fileInputId, previewContainerId, previewImageI
   const previewImage = document.getElementById(previewImageId)
 
   if (!fileInput || !previewContainer || !previewImage) {
-    console.warn(`Image preview setup failed: Missing elements for ${fileInputId}`)
     return
   }
 
   fileInput.addEventListener('change', async (event) => {
     const file = event.target.files[0]
-    
+
     if (file) {
       // Validate file type
       if (!file.type.startsWith('image/')) {
@@ -52,15 +52,15 @@ export function setupImagePreview(fileInputId, previewContainerId, previewImageI
         try {
           await uploadCircuitImage(file)
           showNotification('Circuit image uploaded successfully!', 'success')
-          
+
           // Refresh the race settings and modal
           await loadRaceSettings()
           populateSettingsModal()
-          
+
           // Clear the preview since we now show the actual uploaded image
           clearPreview(previewContainerId, previewImageId)
           fileInput.value = '' // Clear the file input
-        } catch (error) {
+        } catch (_error) {
           showNotification('Failed to upload circuit image. Please try again.', 'error')
           clearPreview(previewContainerId, previewImageId)
           fileInput.value = '' // Clear the file input
@@ -80,11 +80,11 @@ export function setupImagePreview(fileInputId, previewContainerId, previewImageI
 export function clearPreview(previewContainerId, previewImageId) {
   const previewContainer = document.getElementById(previewContainerId)
   const previewImage = document.getElementById(previewImageId)
-  
+
   if (previewContainer) {
     previewContainer.style.display = 'none'
   }
-  
+
   if (previewImage) {
     previewImage.src = ''
   }
@@ -105,10 +105,10 @@ export function clearAllPreviews() {
 export function initializeImagePreviews() {
   // Setup preview for add driver modal
   setupImagePreview('profilePictureAdd', 'addPicturePreviewContainer', 'addPicturePreview')
-  
+
   // Setup preview for edit driver modal
   setupImagePreview('profilePictureEdit', 'editPicturePreviewContainer', 'editPicturePreview')
-  
+
   // Setup preview for circuit image upload
   setupImagePreview('circuitImageUpload', 'circuitImagePreviewContainer', 'circuitImagePreview')
 }
