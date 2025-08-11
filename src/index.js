@@ -393,8 +393,13 @@ app.post('/race-settings/clear-next-race', isAuthenticated, async (_req, res) =>
     // Delete circuit image file if exists
     if (settings.circuitImage) {
       const imagePath = path.join(__dirname, '../public', settings.circuitImage)
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath)
+      try {
+        if (fs.existsSync(imagePath)) {
+          fs.unlinkSync(imagePath)
+        }
+      } catch (err) {
+        console.error('Error deleting circuit image file:', err)
+        // Continue with clearing race settings even if file deletion fails
       }
     }
 
