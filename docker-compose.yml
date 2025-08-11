@@ -48,7 +48,9 @@ services:
       - app-network
 
   caddy:
-    image: caddy:2-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile.caddy
     ports:
       - 80:80
       - 443:443
@@ -60,11 +62,8 @@ services:
       # Choose one Caddyfile based on your deployment mode:
       # For HTTP mode (development/testing):
       # - ./config/Caddyfile.http:/etc/caddy/Caddyfile:ro
-      # For HTTPS local mode (self-signed certificates):
-      # - ./config/Caddyfile.https-local:/etc/caddy/Caddyfile:ro  
       # For HTTPS production mode (Let's Encrypt):
-      # - ./config/Caddyfile.https-production:/etc/caddy/Caddyfile:ro
-      - ./config/Caddyfile.http:/etc/caddy/Caddyfile:ro
+      - ./config/Caddyfile.https-production:/etc/caddy/Caddyfile:ro
       - uploads_shared:/var/www/html/uploads:ro
       - caddy_data:/data
       - caddy_config:/config

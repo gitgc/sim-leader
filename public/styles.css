@@ -562,6 +562,14 @@ html {
     transform: scale(1.05);
 }
 
+/* Disabled button states */
+.btn:disabled, .btn-edit:disabled, .btn-delete:disabled, .btn-settings:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    pointer-events: none;
+}
+
 /* Loading State */
 .loading {
     text-align: center;

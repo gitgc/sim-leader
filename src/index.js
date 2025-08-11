@@ -382,6 +382,36 @@ app.delete('/race-settings/circuit-image', isAuthenticated, async (_req, res) =>
   }
 })
 
+// Clear next race (protected endpoint)
+app.post('/race-settings/clear-next-race', isAuthenticated, async (_req, res) => {
+  try {
+    let settings = await RaceSettings.findOne()
+    if (!settings) {
+      settings = await RaceSettings.create({})
+    }
+
+    // Delete circuit image file if exists
+    if (settings.circuitImage) {
+      const imagePath = path.join(__dirname, '../public', settings.circuitImage)
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath)
+      }
+    }
+
+    // Clear all race settings
+    await settings.update({
+      nextRaceLocation: null,
+      nextRaceDate: null,
+      raceDescription: null,
+      circuitImage: null,
+    })
+
+    res.json(settings)
+  } catch (_error) {
+    res.status(500).json({ error: 'Error clearing next race' })
+  }
+})
+
 app.put('/leaderboard/:id', isAuthorized, async (req, res) => {
   try {
     const { id } = req.params

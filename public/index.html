@@ -29,7 +29,7 @@
                         <!-- Auth buttons will be inserted here -->
                     </div>
                     <div class="settings-section" id="settingsSection" style="display: none;">
-                        <button class="btn-settings" onclick="showSettingsModal()" title="Race Settings">
+                        <button class="btn-settings" data-action="showSettingsModal" title="Race Settings">
                             <i class="fas fa-cog"></i>
                         </button>
                     </div>
@@ -61,10 +61,10 @@
 
         <!-- Controls -->
         <div class="controls" id="controls" style="display: none;">
-            <button class="btn btn-primary" onclick="showAddDriverModal()">
+            <button class="btn btn-primary" data-action="showAddDriverModal">
                 <i class="fas fa-plus"></i> ADD DRIVER
             </button>
-            <button class="btn btn-secondary" onclick="refreshLeaderboard()">
+            <button class="btn btn-secondary" data-action="loadLeaderboard">
                 <i class="fas fa-refresh"></i> REFRESH
             </button>
         </div>
@@ -95,7 +95,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h3>ADD NEW DRIVER</h3>
-                    <span class="close" onclick="closeAddDriverModal()">&times;</span>
+                    <span class="close" data-action="closeAddDriverModal">&times;</span>
                 </div>
                 <form id="addDriverForm">
                     <div class="form-group">
@@ -112,7 +112,7 @@
                         <small class="form-help">Max file size: 5MB. Supported formats: JPG, PNG, GIF, WebP</small>
                     </div>
                     <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closeAddDriverModal()">CANCEL</button>
+                        <button type="button" class="btn btn-secondary" data-action="closeAddDriverModal">CANCEL</button>
                         <button type="submit" class="btn btn-primary">ADD DRIVER</button>
                     </div>
                 </form>
@@ -124,7 +124,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h3>EDIT DRIVER</h3>
-                    <span class="close" onclick="closeEditDriverModal()">&times;</span>
+                    <span class="close" data-action="closeEditDriverModal">&times;</span>
                 </div>
                 <form id="editDriverForm">
                     <input type="hidden" id="editDriverId">
@@ -143,10 +143,10 @@
                             <p id="noPictureText">No profile picture uploaded</p>
                         </div>
                         <div class="picture-actions">
-                            <button type="button" class="btn btn-small btn-secondary" onclick="triggerFileUpload()">
+                            <button type="button" class="btn btn-small btn-secondary" data-action="triggerFileUpload">
                                 <i class="fas fa-upload"></i> UPLOAD NEW
                             </button>
-                            <button type="button" class="btn btn-small btn-delete" onclick="deleteProfilePicture()" id="deletePictureBtn" style="display: none;">
+                            <button type="button" class="btn btn-small btn-delete" data-action="deleteProfilePicture" id="deletePictureBtn" style="display: none;">
                                 <i class="fas fa-trash"></i> DELETE
                             </button>
                         </div>
@@ -154,7 +154,7 @@
                         <small class="form-help">Max file size: 5MB. Supported formats: JPG, PNG, GIF, WebP</small>
                     </div>
                     <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closeEditDriverModal()">CANCEL</button>
+                        <button type="button" class="btn btn-secondary" data-action="closeEditDriverModal">CANCEL</button>
                         <button type="submit" class="btn btn-primary">UPDATE DRIVER</button>
                     </div>
                 </form>
@@ -166,7 +166,7 @@
             <div class="modal-content modal-large">
                 <div class="modal-header">
                     <h3>RACE SETTINGS</h3>
-                    <span class="close" onclick="closeSettingsModal()">&times;</span>
+                    <span class="close" data-action="closeSettingsModal">&times;</span>
                 </div>
                 <form id="settingsForm">
                     <div class="settings-grid">
@@ -193,10 +193,10 @@
                                     <p id="noCircuitImageText">No circuit image uploaded</p>
                                 </div>
                                 <div class="picture-actions">
-                                    <button type="button" class="btn btn-small btn-secondary" onclick="triggerCircuitImageUpload()">
+                                    <button type="button" class="btn btn-small btn-secondary" data-action="triggerCircuitImageUpload">
                                         <i class="fas fa-upload"></i> UPLOAD IMAGE
                                     </button>
-                                    <button type="button" class="btn btn-small btn-delete" onclick="deleteCircuitImage()" id="deleteCircuitImageBtn" style="display: none;">
+                                    <button type="button" class="btn btn-small btn-delete" data-action="deleteCircuitImage" id="deleteCircuitImageBtn" style="display: none;">
                                         <i class="fas fa-trash"></i> DELETE
                                     </button>
                                 </div>
@@ -206,8 +206,8 @@
                         </div>
                     </div>
                     <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()">CANCEL</button>
-                        <button type="button" class="btn btn-warning" onclick="clearNextRace()">CLEAR NEXT RACE</button>
+                        <button type="button" class="btn btn-secondary" data-action="closeSettingsModal">CANCEL</button>
+                        <button type="button" class="btn btn-warning" data-action="clearNextRace">CLEAR NEXT RACE</button>
                         <button type="submit" class="btn btn-primary">SAVE SETTINGS</button>
                     </div>
                 </form>
@@ -215,6 +215,6 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
