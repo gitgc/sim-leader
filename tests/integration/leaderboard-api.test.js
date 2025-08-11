@@ -270,7 +270,7 @@ describe('Leaderboard API Integration Tests', () => {
         try {
           const { driverName, points } = req.body
 
-          if (!driverName || points === undefined || points === null) {
+          if (!driverName || points == null) {
             return res.status(400).json({ error: 'Missing required fields' })
           }
 
