@@ -238,16 +238,7 @@ describe('Leaderboard API Integration Tests', () => {
     test('should create leaderboard entry when authenticated and authorized', async () => {
       const mockApp = createAuthenticatedApp()
 
-      mockApp.post('/leaderboard', async (req, res) => {
-        try {
-          const { driverName, points } = req.body
-          const Leaderboard = sequelize.models.leaderboard
-          const newEntry = await Leaderboard.create({ driverName, points })
-          res.status(201).json(newEntry)
-        } catch (_error) {
-          res.status(500).json({ error: 'Error creating leaderboard entry' })
-        }
-      })
+      mockApp.post('/leaderboard', authLeaderboardPostHandler(sequelize))
 
       const response = await request(mockApp)
         .post('/leaderboard')
