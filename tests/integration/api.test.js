@@ -358,7 +358,27 @@ describe('API Integration Tests', () => {
         next()
       })
 
-      mockApp.post('/race-settings/clear-next-race', clearNextRaceHandler(RaceSettings))
+      mockApp.post('/race-settings/clear-next-race', async (_req, res) => {
+        try {
+          let settings = await RaceSettings.findOne()
+          if (!settings) {
+            settings = await RaceSettings.create({})
+          }
+
+          // Clear all race settings
+          await settings.update({
+            nextRaceLocation: null,
+            nextRaceDate: null,
+            raceDescription: null,
+            circuitImage: null,
+          })
+
+          res.json(settings)
+        } catch (_error) {
+          res.status(500).json({ error: 'Error clearing race settings' })
+        }
+      })
+
       const response = await request(mockApp).post('/race-settings/clear-next-race').expect(200)
 
       // Verify all fields are cleared

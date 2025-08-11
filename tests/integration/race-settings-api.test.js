@@ -130,27 +130,6 @@ describe('Race Settings API Integration Tests', () => {
       expect(response.body).toEqual({ error: 'Authentication required' })
     })
 
-    // Shared helper for clearing race settings
-    function clearRaceSettingsHandler(RaceSettings) {
-      return async (_req, res) => {
-        try {
-          let settings = await RaceSettings.findOne()
-          if (!settings) {
-            settings = await RaceSettings.create({})
-          }
-          await settings.update({
-            nextRaceLocation: null,
-            nextRaceDate: null,
-            raceDescription: null,
-            circuitImage: null,
-          })
-          res.json(settings)
-        } catch (_error) {
-          res.status(500).json({ error: 'Error clearing next race' })
-        }
-      }
-    }
-
     test('should successfully clear all race settings when user is authenticated', async () => {
       // Create test race settings with data
       const RaceSettings = sequelize.models.raceSettings
@@ -168,13 +147,6 @@ describe('Race Settings API Integration Tests', () => {
       // Create mock app with authenticated user
       const mockApp = createAuthenticatedApp()
 
-      mockApp.post('/race-settings/clear-next-race', clearRaceSettingsHandler(RaceSettings))
-      const RaceSettings = sequelize.models.raceSettings
-      await RaceSettings.destroy({ where: {} })
-
-      // Create mock app with authenticated user
-      const mockApp = createAuthenticatedApp()
-
       mockApp.post('/race-settings/clear-next-race', async (_req, res) => {
         try {
           let settings = await RaceSettings.findOne()
@@ -182,7 +154,7 @@ describe('Race Settings API Integration Tests', () => {
             settings = await RaceSettings.create({})
           }
 
-          // Clear all race settings (should be null already)
+          // Clear all race settings
           await settings.update({
             nextRaceLocation: null,
             nextRaceDate: null,

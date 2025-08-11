@@ -4,7 +4,8 @@ const { Sequelize } = require('sequelize')
 
 // Mock passport and database modules
 jest.mock('../../src/config/db', () => {
-  return new Sequelize('sqlite::memory:', { logging: false })
+  const mockSequelize = require('sequelize').Sequelize
+  return new mockSequelize('sqlite::memory:', { logging: false })
 })
 
 jest.mock('passport', () => ({
