@@ -77,7 +77,7 @@ jobs:
         docker compose exec -T app curl -f http://localhost:3001/ -o /dev/null -s
         
         # Test internal application endpoints
-        docker compose exec -T app curl -f http://localhost:3001/race-settings -o /dev/null -s
+        docker compose exec -T app curl -f http://localhost:3001/api/race-settings -o /dev/null -s
         
         echo "✅ Application health test passed"
 
@@ -89,7 +89,7 @@ jobs:
         curl -f http://localhost/ -o /dev/null -s -v
         
         # Test API endpoints through Caddy
-        curl -f http://localhost/race-settings -o /dev/null -s
+        curl -f http://localhost/api/race-settings -o /dev/null -s
         
         # Test that we get proper headers from Caddy
         response_headers=$(curl -I http://localhost/ 2>/dev/null)
@@ -118,7 +118,7 @@ jobs:
         }
         
         # Test API endpoints return valid JSON
-        race_settings=$(curl -s http://localhost/race-settings)
+        race_settings=$(curl -s http://localhost/api/race-settings)
         echo "$race_settings" | jq . > /dev/null || {
           echo "❌ Race settings endpoint doesn't return valid JSON"
           echo "Response:"
@@ -127,7 +127,7 @@ jobs:
         }
         
         # Test leaderboard endpoint
-        leaderboard=$(curl -s http://localhost/leaderboard)
+        leaderboard=$(curl -s http://localhost/api/leaderboard)
         echo "$leaderboard" | jq . > /dev/null || {
           echo "❌ Leaderboard endpoint doesn't return valid JSON"
           echo "Response:"
