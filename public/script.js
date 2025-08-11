@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE_URL = 'http://localhost:3001';
+const API_BASE_URL = window.location.protocol + '//' + window.location.host;
 
 // Global state
 let drivers = [];

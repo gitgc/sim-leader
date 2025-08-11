@@ -176,6 +176,11 @@ Dockerfile.dev
 test-results/
 coverage/
 
+# Caddy
+caddy_data/
+caddy_config/
+caddy_logs/
+
 # Misc
 *.tgz
 *.tar.gz

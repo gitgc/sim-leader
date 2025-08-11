@@ -1,5 +1,8 @@
 # Use the official Node.js runtime as a parent image
-FROM node:18-alpine
+FROM node:22-alpine
+
+# Install curl for healthcheck
+RUN apk add --no-cache curl
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
