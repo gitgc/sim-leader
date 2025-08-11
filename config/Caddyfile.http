@@ -1,17 +1,17 @@
-# HTTPS Local Mode Caddyfile - For local development with self-signed certificates
-# Uses automatic HTTPS with self-signed certificates
-
+# HTTP Mode Caddyfile - For development/testing
+# No HTTPS, simple HTTP reverse proxy
 {
-	auto_https on
+	auto_https off
 }
 
-https://localhost {
+http://localhost {
 	reverse_proxy app:3001
 
 	@static path *.css *.js *.png *.jpg *.jpeg *.gif *.ico *.svg *.woff *.woff2 *.ttf *.eot
 	header @static Cache-Control "public, max-age=86400"
 
 	header {
+		# Remove server info
 		-Server
 
 		# Security headers

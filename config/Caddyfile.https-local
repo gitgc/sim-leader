@@ -1,13 +1,10 @@
-# HTTPS Production Mode Caddyfile - For production with Let's Encrypt
-# Uses Let's Encrypt with DigitalOcean DNS challenge
-
+# HTTPS Local Mode Caddyfile - For local development with self-signed certificates
+# Uses automatic HTTPS with self-signed certificates
 {
 	auto_https on
-	email {$CADDY_EMAIL}
-	acme_dns digitalocean {$DIGITALOCEAN_API_TOKEN}
 }
 
-{$DOMAIN} {
+https://localhost {
 	reverse_proxy app:3001
 
 	@static path *.css *.js *.png *.jpg *.jpeg *.gif *.ico *.svg *.woff *.woff2 *.ttf *.eot
@@ -21,9 +18,6 @@
 		X-Frame-Options DENY
 		X-XSS-Protection "1; mode=block"
 		Referrer-Policy strict-origin-when-cross-origin
-
-		# HSTS for production
-		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 	}
 
 	encode gzip

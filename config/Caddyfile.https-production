@@ -1,18 +1,18 @@
-# HTTP Mode Caddyfile - For development/testing
-# No HTTPS, simple HTTP reverse proxy
-
+# HTTPS Production Mode Caddyfile - For production with Let's Encrypt
+# Uses Let's Encrypt with DigitalOcean DNS challenge
 {
-	auto_https off
+	auto_https on
+	email {$CADDY_EMAIL}
+	acme_dns digitalocean {$DIGITALOCEAN_API_TOKEN}
 }
 
-http://localhost {
+{$DOMAIN} {
 	reverse_proxy app:3001
 
 	@static path *.css *.js *.png *.jpg *.jpeg *.gif *.ico *.svg *.woff *.woff2 *.ttf *.eot
 	header @static Cache-Control "public, max-age=86400"
 
 	header {
-		# Remove server info
 		-Server
 
 		# Security headers
@@ -20,6 +20,9 @@ http://localhost {
 		X-Frame-Options DENY
 		X-XSS-Protection "1; mode=block"
 		Referrer-Policy strict-origin-when-cross-origin
+
+		# HSTS for production
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 	}
 
 	encode gzip

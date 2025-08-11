@@ -69,11 +69,11 @@ The application includes a Caddy load balancer with three different configuratio
 
 ##### 1. HTTP Mode (Development/Testing)
 
-**Caddyfile**: `Caddyfile.http`
+**Caddyfile**: `config/Caddyfile.http`
 
 ```yaml
 # In docker-compose.yml, use:
-- ./Caddyfile.http:/etc/caddy/Caddyfile:ro
+- ./config/Caddyfile.http:/etc/caddy/Caddyfile:ro
 ```
 
 - Serves on `http://localhost`
@@ -83,11 +83,11 @@ The application includes a Caddy load balancer with three different configuratio
 
 ##### 2. HTTPS Local Mode (Development with SSL)
 
-**Caddyfile**: `Caddyfile.https-local`
+**Caddyfile**: `config/Caddyfile.https-local`
 
 ```yaml
 # In docker-compose.yml, use:
-- ./Caddyfile.https-local:/etc/caddy/Caddyfile:ro
+- ./config/Caddyfile.https-local:/etc/caddy/Caddyfile:ro
 ```
 
 - Serves on `https://localhost`
@@ -97,11 +97,11 @@ The application includes a Caddy load balancer with three different configuratio
 
 ##### 3. HTTPS Production Mode (Let's Encrypt)
 
-**Caddyfile**: `Caddyfile.https-production`
+**Caddyfile**: `config/Caddyfile.https-production`
 
 ```yaml
 # In docker-compose.yml, use:
-- ./Caddyfile.https-production:/etc/caddy/Caddyfile:ro
+- ./config/Caddyfile.https-production:/etc/caddy/Caddyfile:ro
 ```
 
 - Serves on your actual domain with Let's Encrypt certificates
@@ -121,10 +121,10 @@ The application includes a Caddy load balancer with three different configuratio
 # In docker-compose.yml caddy service:
 volumes:
   # Comment out other modes:
-  # - ./Caddyfile.http:/etc/caddy/Caddyfile:ro
-  # - ./Caddyfile.https-local:/etc/caddy/Caddyfile:ro  
+  # - ./config/Caddyfile.http:/etc/caddy/Caddyfile:ro
+  # - ./config/Caddyfile.https-local:/etc/caddy/Caddyfile:ro  
   # Uncomment production mode:
-  - ./Caddyfile.https-production:/etc/caddy/Caddyfile:ro
+  - ./config/Caddyfile.https-production:/etc/caddy/Caddyfile:ro
 ```
 
 Then restart: `docker compose down && docker compose up --build -d`
@@ -234,11 +234,11 @@ sim-leader/
 │   ├── styles.css        # F1-themed styling
 │   ├── script.js         # Frontend logic
 │   └── uploads/          # User-uploaded files (local dev only)
+├── config/
+│   ├── Caddyfile.http           # HTTP mode configuration
+│   ├── Caddyfile.https-local    # HTTPS local mode configuration  
+│   └── Caddyfile.https-production # HTTPS production mode configuration
 ├── docker-compose.yml    # Multi-service orchestration
-├── Caddyfile            # Load balancer configuration
-├── Caddyfile.http           # HTTP mode configuration
-├── Caddyfile.https-local    # HTTPS local mode configuration  
-├── Caddyfile.https-production # HTTPS production mode configuration
 ├── .env.example         # Environment template
 └── README.md           # This file
 ```
@@ -275,6 +275,165 @@ The application uses Docker named volumes for persistent data storage:
 - **Styling**: F1-inspired responsive design
 - **Infrastructure**: Docker for database and reverse proxy
 - **SSL/TLS**: Let's Encrypt via DigitalOcean DNS challenge
+
+## Testing
+
+The application includes a comprehensive test suite with unit tests, integration tests, and end-to-end tests.
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests with coverage report
+npm run test:coverage
+
+# Run tests in watch mode (for development)
+npm run test:watch
+```
+
+### Test Coverage
+
+- **Unit Tests**: Models, authentication, utilities, database operations
+- **Integration Tests**: API endpoints with mocked dependencies
+- **End-to-End Tests**: Complete workflow scenarios
+- **Coverage**: 81.25% overall coverage
+
+### Test Technologies
+
+- **Jest**: Testing framework and test runner
+- **Supertest**: HTTP testing for API endpoints
+- **SQLite**: In-memory database for isolated testing
+- **Mocking**: External dependencies (Passport, database connections)
+
+For detailed testing information, see [Testing Guide](docs/TESTING.md).
+
+## CI/CD
+
+The project includes comprehensive GitHub Actions workflows for automated testing, code quality checks, and deployment.
+
+### Automated Workflows
+
+**Tests Workflow** (on Pull Requests and Push to Main):
+
+- ✅ **Multi-version testing**: Node.js 18.x, 20.x, 22.x
+- ✅ **Code quality**: Biome linting and formatting checks
+- ✅ **Security audits**: npm audit for dependency vulnerabilities
+- ✅ **Test coverage**: Automated test execution with coverage reporting
+- ✅ **Dependency validation**: Check for outdated packages
+
+**Deploy Workflow** (triggered after successful tests on Main):
+
+- ✅ **Docker image build**: Multi-architecture (AMD64, ARM64) Docker images
+- ✅ **Container registry**: Published to GitHub Container Registry (ghcr.io)
+- ✅ **Semantic versioning**: Automatic version increments starting from v0.0.1
+- ✅ **Version management**: Automatically updates package.json and commits changes
+- ✅ **GitHub releases**: Automated release creation with Docker commands
+- ✅ **Image caching**: Optimized builds with GitHub Actions cache
+
+### Docker Images
+
+After each merge to main, Docker images are automatically built and published with semantic versioning:
+
+```bash
+# Pull the latest image
+docker pull ghcr.io/gitgc/sim-leader:latest
+
+# Pull a specific version
+docker pull ghcr.io/gitgc/sim-leader:v0.0.1
+
+# Run the containerized application (latest)
+docker run -p 3001:3001 --env-file .env ghcr.io/gitgc/sim-leader:latest
+
+# Run a specific version
+docker run -p 3001:3001 --env-file .env ghcr.io/gitgc/sim-leader:v0.0.1
+```
+
+### Code Quality Commands
+
+```bash
+# Linting and formatting
+npm run lint        # Check code with Biome linter
+npm run lint:fix    # Fix auto-fixable linting issues
+npm run format      # Check code formatting
+npm run format:fix  # Auto-format code
+npm run check       # Run both linting and formatting checks
+npm run check:fix   # Fix both linting and formatting issues
+```
+
+**Code Style Configuration:**
+
+- **Semicolons**: Only added when required (ASI-safe)
+- **Quotes**: Single quotes for strings
+- **Indentation**: 2 spaces
+- **Line Width**: 100 characters
+
+The GitHub Actions workflows automatically run these checks on every PR and deploy successful changes to the main branch.
+
+### Workflow Files
+
+- **`.github/workflows/test.yml`**: Runs tests, linting, and security checks on every PR and push
+- **`.github/workflows/deploy.yml`**: Updates package.json version, builds and publishes Docker images after successful tests on main branch
+
+### Version Management
+
+The deployment process automatically:
+
+1. Determines the next semantic version (patch increment)
+2. Updates `package.json` with the new version
+3. Commits the version change to the repository
+4. Builds Docker images with the new version tag
+5. Creates a GitHub release
+
+This ensures that the package.json version always stays in sync with the deployed Docker images and GitHub releases.
+
+## Deployment
+
+### Using Pre-built Docker Images
+
+The easiest way to deploy the application is using the pre-built Docker images from GitHub Container Registry. Images are automatically versioned with semantic versioning (starting from v0.0.1):
+
+```bash
+# Pull the latest image
+docker pull ghcr.io/gitgc/sim-leader:latest
+
+# Or pull a specific version for production stability
+docker pull ghcr.io/gitgc/sim-leader:v0.0.1
+
+# Create your environment file
+cp .env.example .env
+# Edit .env with your configuration
+
+# Run with Docker (standalone) - latest
+docker run -p 3001:3001 --env-file .env ghcr.io/gitgc/sim-leader:latest
+
+# Run with Docker (standalone) - specific version
+docker run -p 3001:3001 --env-file .env ghcr.io/gitgc/sim-leader:v0.0.1
+
+# Or run with docker-compose (recommended)
+# Edit docker-compose.yml to use the pre-built image:
+# image: ghcr.io/gitgc/sim-leader:v0.0.1  # Use specific version for production
+# image: ghcr.io/gitgc/sim-leader:latest   # Or use latest for development
+# Comment out the 'build: .' line
+docker compose up -d
+```
+
+### Production Deployment Options
+
+1. **Cloud Platforms**: Deploy directly to AWS, Google Cloud, Azure, or DigitalOcean
+2. **Container Orchestration**: Use with Kubernetes, Docker Swarm, or Nomad
+3. **PaaS Providers**: Deploy to Heroku, Railway, Render, or similar platforms
+4. **Self-hosted**: Run on your own servers with Docker Compose
+
+### Deployment Checklist
+
+- [ ] Configure environment variables in `.env`
+- [ ] Set up Google OAuth credentials
+- [ ] Configure authorized emails
+- [ ] Set up PostgreSQL database
+- [ ] Configure domain and SSL (for production)
+- [ ] Test the deployment
 
 ## Contributing
 
