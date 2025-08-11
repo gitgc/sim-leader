@@ -15,9 +15,9 @@ export function getPositionClass(position) {
 }
 
 // Upload file helper function
-export async function uploadFile(file, endpoint) {
+export async function uploadFile(file, endpoint, fieldName = 'file') {
   const formData = new FormData()
-  formData.append('file', file)
+  formData.append(fieldName, file)
 
   const response = await fetch(endpoint, {
     method: 'POST',
