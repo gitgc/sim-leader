@@ -1,3 +1,4 @@
+import { clearAllPreviews, clearPreview } from './imagePreview.js'
 import { showNotification } from './notifications.js'
 import { findDriverById, getIsAuthorized } from './state.js'
 
@@ -16,6 +17,7 @@ export function showAddDriverModal() {
 export function closeAddDriverModal() {
   document.getElementById('addDriverModal').style.display = 'none'
   document.getElementById('addDriverForm').reset()
+  clearPreview('addPicturePreviewContainer', 'addPicturePreview')
 }
 
 // Show edit driver modal
@@ -56,6 +58,7 @@ export function showEditDriverModal(driverId) {
 export function closeEditDriverModal() {
   document.getElementById('editDriverModal').style.display = 'none'
   document.getElementById('editDriverForm').reset()
+  clearPreview('editPicturePreviewContainer', 'editPicturePreview')
 }
 
 // Show settings modal
@@ -83,6 +86,7 @@ export function showSettingsModal() {
 export function closeSettingsModal() {
   document.getElementById('settingsModal').style.display = 'none'
   document.getElementById('settingsForm').reset()
+  clearPreview('circuitImagePreviewContainer', 'circuitImagePreview')
 }
 
 // Setup modal event listeners
@@ -110,6 +114,10 @@ export function triggerFileUpload() {
   document.getElementById('profilePictureInput').click()
 }
 
+export function triggerEditFileUpload() {
+  document.getElementById('profilePictureEdit').click()
+}
+
 export function triggerCircuitImageUpload() {
-  document.getElementById('circuitImageInput').click()
+  document.getElementById('circuitImageUpload').click()
 }

@@ -4,6 +4,7 @@ import {
   createDriver,
   uploadProfilePicture,
 } from './api.js'
+import { clearPreview } from './imagePreview.js'
 import { loadLeaderboard } from './leaderboard.js'
 import { closeAddDriverModal, closeEditDriverModal } from './modals.js'
 import { showNotification } from './notifications.js'
@@ -76,6 +77,13 @@ export async function handleEditDriver(event) {
 
   try {
     await apiUpdateDriver(driverId, driverData)
+
+    // If there's a new profile picture, upload it
+    const profilePictureFile = formData.get('profilePicture')
+    if (profilePictureFile && profilePictureFile.size > 0) {
+      await uploadProfilePictureForDriver(driverId, profilePictureFile)
+    }
+
     closeEditDriverModal()
     await loadLeaderboard()
     showNotification('Driver updated successfully!', 'success')
@@ -122,10 +130,44 @@ export async function deleteDriver(driverId) {
 // Upload profile picture for a driver
 async function uploadProfilePictureForDriver(driverId, file) {
   try {
-    await uploadProfilePicture(driverId, file)
+    const result = await uploadProfilePicture(driverId, file)
+    
+    // If we're in the edit modal, update the current picture display immediately
+    const editDriverId = document.getElementById('editDriverId')
+    if (editDriverId && editDriverId.value === driverId.toString()) {
+      updateEditModalProfilePicture(result.profilePicture)
+      // Clear the preview since we now show the actual uploaded image
+      clearPreview('editPicturePreviewContainer', 'editPicturePreview')
+    }
+    
+    // Also clear preview for add modal if applicable
+    const addModal = document.getElementById('addDriverModal')
+    if (addModal && addModal.style.display === 'block') {
+      clearPreview('addPicturePreviewContainer', 'addPicturePreview')
+    }
   } catch (_error) {
     showNotification('Failed to upload profile picture', 'warning')
     // Don't throw - we don't want to prevent driver creation if picture upload fails
+  }
+}
+
+// Update the profile picture display in the edit modal
+function updateEditModalProfilePicture(profilePictureUrl) {
+  const currentPicture = document.getElementById('currentPicture')
+  const noPictureText = document.getElementById('noPictureText')
+  const deletePictureBtn = document.getElementById('deletePictureBtn')
+
+  if (currentPicture && profilePictureUrl) {
+    currentPicture.src = profilePictureUrl
+    currentPicture.style.display = 'block'
+    
+    if (noPictureText) {
+      noPictureText.style.display = 'none'
+    }
+    
+    if (deletePictureBtn) {
+      deletePictureBtn.style.display = 'inline-flex'
+    }
   }
 }
 

@@ -95,7 +95,7 @@ router.post('/circuit-image', isAuthenticated, upload.single('circuitImage'), as
     }
 
     // Update with new circuit image path
-    const circuitImagePath = `/uploads/circuits/${req.file.filename}`
+    const circuitImagePath = `/uploads/images-circuit/${req.file.filename}`
     await settings.update({ circuitImage: circuitImagePath })
 
     res.json({

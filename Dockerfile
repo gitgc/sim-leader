@@ -16,8 +16,8 @@ RUN npm ci --omit=dev && npm cache clean --force
 # Copy the rest of the application code
 COPY . .
 
-# Create uploads directory
-RUN mkdir -p public/uploads
+# Create uploads directory structure
+RUN mkdir -p public/uploads/images-driver public/uploads/images-circuit
 
 # Expose the port the app runs on
 EXPOSE 3001

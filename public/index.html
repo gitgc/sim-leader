@@ -108,6 +108,10 @@
                     </div>
                     <div class="form-group">
                         <label for="profilePictureAdd">Profile Picture (Optional)</label>
+                        <div class="picture-preview-container" id="addPicturePreviewContainer" style="display: none;">
+                            <img id="addPicturePreview" src="" alt="Profile picture preview" style="max-width: 150px; max-height: 150px; border-radius: 8px; margin-bottom: 10px;">
+                            <p class="preview-label">Preview - New Profile Picture</p>
+                        </div>
                         <input type="file" id="profilePictureAdd" name="profilePicture" accept="image/*">
                         <small class="form-help">Max file size: 5MB. Supported formats: JPG, PNG, GIF, WebP</small>
                     </div>
@@ -142,15 +146,19 @@
                             <img id="currentPicture" src="" alt="Current profile picture" style="display: none;">
                             <p id="noPictureText">No profile picture uploaded</p>
                         </div>
+                        <div class="picture-preview-container" id="editPicturePreviewContainer" style="display: none;">
+                            <img id="editPicturePreview" src="" alt="New profile picture preview" style="max-width: 150px; max-height: 150px; border-radius: 8px; margin-bottom: 10px;">
+                            <p class="preview-label">Preview - New Profile Picture</p>
+                        </div>
                         <div class="picture-actions">
-                            <button type="button" class="btn btn-small btn-secondary" data-action="triggerFileUpload">
+                            <button type="button" class="btn btn-small btn-secondary" data-action="triggerEditFileUpload">
                                 <i class="fas fa-upload"></i> UPLOAD NEW
                             </button>
                             <button type="button" class="btn btn-small btn-delete" data-action="deleteProfilePicture" id="deletePictureBtn" style="display: none;">
                                 <i class="fas fa-trash"></i> DELETE
                             </button>
                         </div>
-                        <input type="file" id="profilePictureEdit" accept="image/*" style="display: none;" onchange="uploadProfilePicture()">
+                        <input type="file" id="profilePictureEdit" name="profilePicture" accept="image/*" style="display: none;">
                         <small class="form-help">Max file size: 5MB. Supported formats: JPG, PNG, GIF, WebP</small>
                     </div>
                     <div class="form-actions">
@@ -192,6 +200,10 @@
                                     <img id="currentCircuitImage" src="" alt="Current circuit image" style="display: none;">
                                     <p id="noCircuitImageText">No circuit image uploaded</p>
                                 </div>
+                                <div class="picture-preview-container" id="circuitImagePreviewContainer" style="display: none;">
+                                    <img id="circuitImagePreview" src="" alt="New circuit image preview" style="max-width: 200px; max-height: 150px; border-radius: 8px; margin-bottom: 10px;">
+                                    <p class="preview-label">Preview - New Circuit Image</p>
+                                </div>
                                 <div class="picture-actions">
                                     <button type="button" class="btn btn-small btn-secondary" data-action="triggerCircuitImageUpload">
                                         <i class="fas fa-upload"></i> UPLOAD IMAGE
@@ -200,7 +212,7 @@
                                         <i class="fas fa-trash"></i> DELETE
                                     </button>
                                 </div>
-                                <input type="file" id="circuitImageUpload" accept="image/*" style="display: none;" onchange="uploadCircuitImage()">
+                                <input type="file" id="circuitImageUpload" accept="image/*" style="display: none;">
                                 <small class="form-help">Max file size: 5MB. Supported formats: JPG, PNG, GIF, WebP</small>
                             </div>
                         </div>

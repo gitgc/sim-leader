@@ -74,7 +74,7 @@ router.post(
       }
 
       // Update with new profile picture path
-      const profilePicturePath = `/uploads/${req.file.filename}`
+      const profilePicturePath = `/uploads/images-driver/${req.file.filename}`
       await entry.update({ profilePicture: profilePicturePath })
 
       logger.logFileOperation('upload', req.file.filename, true, {
