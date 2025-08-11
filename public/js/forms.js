@@ -135,7 +135,7 @@ export async function deleteProfilePicture() {
   if (!driverId) return
 
   try {
-    const response = await fetch(`${API_BASE_URL}/leaderboard/${driverId}/profile-picture`, {
+    const response = await fetch(`${API_BASE_URL}/api/leaderboard/${driverId}/profile-picture`, {
       method: 'DELETE',
     })
 

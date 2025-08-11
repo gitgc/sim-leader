@@ -27,7 +27,12 @@
   encode gzip
 
   log {
-    output file /var/log/caddy/access.log
+    output file /var/log/caddy/access.log {
+      roll_size 10MB
+      roll_keep 14
+      roll_keep_for 720h
+    }
     format json
+    level INFO
   }
 }

@@ -1,8 +1,9 @@
 # Reusable configuration blocks
 x-healthcheck-defaults: &healthcheck-defaults
-  interval: 30s
-  timeout: 10s
+  interval: 10s
+  timeout: 5s
   retries: 3
+  start_period: 30s
 
 services:
   db:
@@ -13,9 +14,15 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - db_data:/var/lib/postgresql/data
-    ports:
-      - 5432:5432
+    # Uncomment for database debugging/access from host:
+    # ports:
+    #   - 5432:5432
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     healthcheck:
       <<: *healthcheck-defaults
       test: [CMD-SHELL, "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
@@ -35,12 +42,20 @@ services:
       - GOOGLE_CALLBACK_URL=${GOOGLE_CALLBACK_URL}
       - SESSION_SECRET=${SESSION_SECRET}
       - AUTHORIZED_EMAILS=${AUTHORIZED_EMAILS}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - NODE_ENV=${NODE_ENV:-production}
     volumes:
       - uploads_shared:/usr/src/app/public/uploads
+      - ./logs:/usr/src/app/logs
     depends_on:
       db:
         condition: service_healthy
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "10"
     healthcheck:
       <<: *healthcheck-defaults
       test: [CMD-SHELL, "curl -f http://localhost:${PORT}/ || exit 1"]
@@ -74,6 +89,11 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "7"
     networks:
       - app-network
 

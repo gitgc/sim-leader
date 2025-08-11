@@ -7,17 +7,20 @@ const {
   getPublicFilePath,
 } = require('../utils/fileManager')
 const Leaderboard = require('../models/leaderboard')
+const logger = require('../utils/logger')
 
 const router = express.Router()
 
 // Public leaderboard route (no auth required)
 router.get('/', async (_req, res) => {
   try {
+    logger.logDatabase('fetch', 'leaderboard')
     const leaderboards = await Leaderboard.findAll({
       order: [['points', 'DESC']],
     })
     res.json(leaderboards)
-  } catch (_error) {
+  } catch (error) {
+    logger.logError(error, { context: 'Failed to fetch leaderboards' })
     res.status(500).json({ error: 'Error fetching leaderboards' })
   }
 })
@@ -26,9 +29,15 @@ router.get('/', async (_req, res) => {
 router.post('/', isAuthorized, async (req, res) => {
   try {
     const { driverName, points } = req.body
+    logger.logDatabase('create', 'leaderboard', { driverName, points })
     const newEntry = await Leaderboard.create({ driverName, points })
+    logger.info('New leaderboard entry created', { id: newEntry.id, driverName })
     res.status(201).json(newEntry)
-  } catch (_error) {
+  } catch (error) {
+    logger.logError(error, {
+      context: 'Failed to create leaderboard entry',
+      driverName: req.body.driverName,
+    })
     res.status(500).json({ error: 'Error creating leaderboard entry' })
   }
 })
@@ -43,6 +52,7 @@ router.post(
       const { id } = req.params
 
       if (!req.file) {
+        logger.warn('Profile picture upload failed: no file provided', { driverId: id })
         return res.status(400).json({ error: 'No file uploaded' })
       }
 
@@ -50,12 +60,16 @@ router.post(
       if (!entry) {
         // Clean up uploaded file if driver not found
         cleanupUploadedFile(req)
+        logger.warn('Profile picture upload failed: driver not found', { driverId: id })
         return res.status(404).json({ error: 'Leaderboard entry not found' })
       }
 
       // Delete old profile picture if exists
       if (entry.profilePicture) {
         const oldPicturePath = getPublicFilePath(entry.profilePicture)
+        logger.logFileOperation('delete', entry.profilePicture, true, {
+          reason: 'replacing profile picture',
+        })
         deleteFileIfExists(oldPicturePath)
       }
 
@@ -63,13 +77,24 @@ router.post(
       const profilePicturePath = `/uploads/${req.file.filename}`
       await entry.update({ profilePicture: profilePicturePath })
 
+      logger.logFileOperation('upload', req.file.filename, true, {
+        driverId: id,
+        driverName: entry.driverName,
+        fileSize: req.file.size,
+      })
+
       res.json({
         message: 'Profile picture uploaded successfully',
         profilePicture: profilePicturePath,
       })
-    } catch (_error) {
+    } catch (error) {
       // Clean up uploaded file on error
       cleanupUploadedFile(req)
+      logger.logError(error, {
+        context: 'Profile picture upload failed',
+        driverId: req.params.id,
+        filename: req.file?.filename,
+      })
       res.status(500).json({ error: 'Error uploading profile picture' })
     }
   }
