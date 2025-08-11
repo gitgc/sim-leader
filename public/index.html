@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formula Evergreen Championship - Leaderboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-flag-checkered"></i>
+                    <h1>FORMULA EVERGREEN CHAMPIONSHIP</h1>
+                </div>
+                <div class="header-right">
+                    <div class="season-info">
+                        <span class="season">2025 SEASON</span>
+                        <span class="round">DRIVERS' STANDINGS</span>
+                    </div>
+                    <div class="auth-section" id="authSection">
+                        <!-- Auth buttons will be inserted here -->
+                    </div>
+                    <div class="settings-section" id="settingsSection" style="display: none;">
+                        <button class="btn-settings" onclick="showSettingsModal()" title="Race Settings">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="header-line"></div>
+        </header>
+
+        <!-- Next Race Section -->
+        <div class="next-race-section" id="nextRaceSection">
+            <!-- Race info will be inserted here -->
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat">
+                <span class="stat-label">TOTAL DRIVERS</span>
+                <span class="stat-value" id="totalDrivers">0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">LEADER</span>
+                <span class="stat-value" id="currentLeader">-</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">HIGHEST POINTS</span>
+                <span class="stat-value" id="highestPoints">0</span>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls" id="controls" style="display: none;">
+            <button class="btn btn-primary" onclick="showAddDriverModal()">
+                <i class="fas fa-plus"></i> ADD DRIVER
+            </button>
+            <button class="btn btn-secondary" onclick="refreshLeaderboard()">
+                <i class="fas fa-refresh"></i> REFRESH
+            </button>
+        </div>
+
+        <!-- Authentication Notice -->
+        <div class="auth-notice" id="authNotice" style="display: none;">
+            <div class="notice-content">
+                <i class="fas fa-info-circle"></i>
+                <p>You are viewing the leaderboard in read-only mode. Sign in with an authorized account to manage drivers.</p>
+            </div>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="leaderboard-container">
+            <div class="leaderboard-header">
+                <h2>DRIVERS' CHAMPIONSHIP STANDINGS</h2>
+            </div>
+            <div class="leaderboard" id="leaderboard">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading championship data...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Driver Modal -->
+        <div class="modal" id="addDriverModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>ADD NEW DRIVER</h3>
+                    <span class="close" onclick="closeAddDriverModal()">&times;</span>
+                </div>
+                <form id="addDriverForm">
+                    <div class="form-group">
+                        <label for="driverName">Driver Name</label>
+                        <input type="text" id="driverName" name="driverName" required placeholder="Enter driver name">
+                    </div>
+                    <div class="form-group">
+                        <label for="points">Championship Points</label>
+                        <input type="number" id="points" name="points" required placeholder="Enter points" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="profilePictureAdd">Profile Picture (Optional)</label>
+                        <input type="file" id="profilePictureAdd" name="profilePicture" accept="image/*">
+                        <small class="form-help">Max file size: 5MB. Supported formats: JPG, PNG, GIF, WebP</small>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeAddDriverModal()">CANCEL</button>
+                        <button type="submit" class="btn btn-primary">ADD DRIVER</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Edit Driver Modal -->
+        <div class="modal" id="editDriverModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>EDIT DRIVER</h3>
+                    <span class="close" onclick="closeEditDriverModal()">&times;</span>
+                </div>
+                <form id="editDriverForm">
+                    <input type="hidden" id="editDriverId">
+                    <div class="form-group">
+                        <label for="editDriverName">Driver Name</label>
+                        <input type="text" id="editDriverName" name="driverName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editPoints">Championship Points</label>
+                        <input type="number" id="editPoints" name="points" required min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Current Profile Picture</label>
+                        <div class="current-picture-container" id="currentPictureContainer">
+                            <img id="currentPicture" src="" alt="Current profile picture" style="display: none;">
+                            <p id="noPictureText">No profile picture uploaded</p>
+                        </div>
+                        <div class="picture-actions">
+                            <button type="button" class="btn btn-small btn-secondary" onclick="triggerFileUpload()">
+                                <i class="fas fa-upload"></i> UPLOAD NEW
+                            </button>
+                            <button type="button" class="btn btn-small btn-delete" onclick="deleteProfilePicture()" id="deletePictureBtn" style="display: none;">
+                                <i class="fas fa-trash"></i> DELETE
+                            </button>
+                        </div>
+                        <input type="file" id="profilePictureEdit" accept="image/*" style="display: none;" onchange="uploadProfilePicture()">
+                        <small class="form-help">Max file size: 5MB. Supported formats: JPG, PNG, GIF, WebP</small>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeEditDriverModal()">CANCEL</button>
+                        <button type="submit" class="btn btn-primary">UPDATE DRIVER</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Race Settings Modal -->
+        <div class="modal" id="settingsModal">
+            <div class="modal-content modal-large">
+                <div class="modal-header">
+                    <h3>RACE SETTINGS</h3>
+                    <span class="close" onclick="closeSettingsModal()">&times;</span>
+                </div>
+                <form id="settingsForm">
+                    <div class="settings-grid">
+                        <div class="settings-left">
+                            <div class="form-group">
+                                <label for="nextRaceLocation">Next Race Location</label>
+                                <input type="text" id="nextRaceLocation" name="nextRaceLocation" placeholder="e.g., Monaco Grand Prix">
+                            </div>
+                            <div class="form-group">
+                                <label for="nextRaceDate">Race Date & Time (PST)</label>
+                                <input type="datetime-local" id="nextRaceDate" name="nextRaceDate">
+                                <small class="form-help">Enter time in Pacific Standard Time. Race will auto-expire at midnight PST on race day.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="raceDescription">Race Description</label>
+                                <textarea id="raceDescription" name="raceDescription" rows="4" placeholder="Additional race information..."></textarea>
+                            </div>
+                        </div>
+                        <div class="settings-right">
+                            <div class="form-group">
+                                <label>Circuit Image</label>
+                                <div class="circuit-image-container" id="circuitImageContainer">
+                                    <img id="currentCircuitImage" src="" alt="Current circuit image" style="display: none;">
+                                    <p id="noCircuitImageText">No circuit image uploaded</p>
+                                </div>
+                                <div class="picture-actions">
+                                    <button type="button" class="btn btn-small btn-secondary" onclick="triggerCircuitImageUpload()">
+                                        <i class="fas fa-upload"></i> UPLOAD IMAGE
+                                    </button>
+                                    <button type="button" class="btn btn-small btn-delete" onclick="deleteCircuitImage()" id="deleteCircuitImageBtn" style="display: none;">
+                                        <i class="fas fa-trash"></i> DELETE
+                                    </button>
+                                </div>
+                                <input type="file" id="circuitImageUpload" accept="image/*" style="display: none;" onchange="uploadCircuitImage()">
+                                <small class="form-help">Max file size: 5MB. Supported formats: JPG, PNG, GIF, WebP</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()">CANCEL</button>
+                        <button type="button" class="btn btn-warning" onclick="clearNextRace()">CLEAR NEXT RACE</button>
+                        <button type="submit" class="btn btn-primary">SAVE SETTINGS</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
